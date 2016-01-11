@@ -64,7 +64,7 @@ public class ConnectedCupControllerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Feature(code = "readlevel", name = "Humidity", type = "monitor",
             description = "Read Humidity Readings from Connected Cup")
-    public SensorRecord requestHumidity(@HeaderParam("owner") String owner,
+    public SensorRecord requestLevel(@HeaderParam("owner") String owner,
                                         @HeaderParam("deviceId") String deviceId,
                                         @Context HttpServletResponse response) {
         SensorRecord sensorRecord = null;
@@ -80,12 +80,10 @@ public class ConnectedCupControllerService {
 
 
         if (log.isDebugEnabled()) {
-            log.debug("Sending request to read humidity value of device [" + deviceId + "] via MQTT");
+            log.debug("Sending request to read liquid level value of device [" + deviceId + "] via MQTT");
         }
 
         try {
-
-
             String mqttResource = ConnectedCupConstants.LEVEL_CONTEXT.replace("/", "");
             connectedCupMQTTConnector.publishDeviceData(owner, deviceId, mqttResource, "");
 
@@ -126,7 +124,6 @@ public class ConnectedCupControllerService {
             response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
 
-
         if (log.isDebugEnabled()) {
             log.debug("Sending request to read connected cup temperature of device " +
                       "[" + deviceId + "] via MQTT");
@@ -158,22 +155,8 @@ public class ConnectedCupControllerService {
     public void pushTemperatureData(final DeviceJSON dataMsg,
                                     @Context HttpServletResponse response) {
         String deviceId = dataMsg.deviceId;
-        String deviceIp = dataMsg.reply;
         float temperature = dataMsg.value;
 
-        String registeredIp = deviceToIpMap.get(deviceId);
-
-        if (registeredIp == null) {
-            log.warn("Unregistered IP: Temperature Data Received from an un-registered IP " +
-                     deviceIp + " for device ID - " + deviceId);
-            response.setStatus(Response.Status.PRECONDITION_FAILED.getStatusCode());
-            return;
-        } else if (!registeredIp.equals(deviceIp)) {
-            log.warn("Conflicting IP: Received IP is " + deviceIp + ". Device with ID " + deviceId +
-                     " is already registered under some other IP. Re-registration required");
-            response.setStatus(Response.Status.CONFLICT.getStatusCode());
-            return;
-        }
         SensorDataManager.getInstance().setSensorRecord(deviceId, ConnectedCupConstants.SENSOR_TEMPERATURE,
                                                         String.valueOf(temperature),
                                                         Calendar.getInstance().getTimeInMillis());
@@ -191,25 +174,11 @@ public class ConnectedCupControllerService {
     @Path("controller/push_level")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void pushTemperatureData(final DeviceJSON dataMsg,
+    public void pushLevelData(final DeviceJSON dataMsg,
                                     @Context HttpServletResponse response) {
         String deviceId = dataMsg.deviceId;
-        String deviceIp = dataMsg.reply;
         float temperature = dataMsg.value;
 
-        String registeredIp = deviceToIpMap.get(deviceId);
-
-        if (registeredIp == null) {
-            log.warn("Unregistered IP: Temperature Data Received from an un-registered IP " +
-                     deviceIp + " for device ID - " + deviceId);
-            response.setStatus(Response.Status.PRECONDITION_FAILED.getStatusCode());
-            return;
-        } else if (!registeredIp.equals(deviceIp)) {
-            log.warn("Conflicting IP: Received IP is " + deviceIp + ". Device with ID " + deviceId +
-                     " is already registered under some other IP. Re-registration required");
-            response.setStatus(Response.Status.CONFLICT.getStatusCode());
-            return;
-        }
         SensorDataManager.getInstance().setSensorRecord(deviceId, ConnectedCupConstants.SENSOR_LEVEL,
                                                         String.valueOf(temperature),
                                                         Calendar.getInstance().getTimeInMillis());

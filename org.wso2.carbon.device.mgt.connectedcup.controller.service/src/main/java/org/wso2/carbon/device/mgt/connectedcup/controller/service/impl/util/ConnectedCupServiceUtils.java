@@ -213,6 +213,5 @@ public class ConnectedCupServiceUtils {
             PrivilegedCarbonContext.endTenantFlow();
         }
         return true;
- e;
     }
 }

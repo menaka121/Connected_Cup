@@ -73,7 +73,7 @@ public class ConnectedCupManager implements DeviceManager {
         IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Enrolling a new Virtual Firealarm device : " + device.getDeviceIdentifier());
+                log.debug("Enrolling a new Connected Cup device : " + device.getDeviceIdentifier());
             }
             ConnectedCupDAO.beginTransaction();
             status = iotDeviceManagementDAOFactory.getIotDeviceDAO().addIotDevice(
@@ -86,7 +86,7 @@ public class ConnectedCupManager implements DeviceManager {
                 String msg = "Error occurred while roll back the device enrol transaction :" + device.toString();
                 log.warn(msg, iotDAOEx);
             }
-            String msg = "Error while enrolling the Virtual Firealarm device : " + device.getDeviceIdentifier();
+            String msg = "Error while enrolling the Connected Cup device : " + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -99,7 +99,7 @@ public class ConnectedCupManager implements DeviceManager {
         IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Modifying the Virtual Firealarm device enrollment data");
+                log.debug("Modifying the Connected Cup device enrollment data");
             }
             ConnectedCupDAO.beginTransaction();
             status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
@@ -112,7 +112,7 @@ public class ConnectedCupManager implements DeviceManager {
                 String msg = "Error occurred while roll back the update device transaction :" + device.toString();
                 log.warn(msg, iotDAOEx);
             }
-            String msg = "Error while updating the enrollment of the Virtual Firealarm device : " +
+            String msg = "Error while updating the enrollment of the Connected Cup device : " +
                          device.getDeviceIdentifier();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
@@ -125,7 +125,7 @@ public class ConnectedCupManager implements DeviceManager {
         boolean status;
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Dis-enrolling Virtual Firealarm device : " + deviceId);
+                log.debug("Dis-enrolling Connected Cup device : " + deviceId);
             }
             ConnectedCupDAO.beginTransaction();
             status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
@@ -138,7 +138,7 @@ public class ConnectedCupManager implements DeviceManager {
                 String msg = "Error occurred while roll back the device dis enrol transaction :" + deviceId.toString();
                 log.warn(msg, iotDAOEx);
             }
-            String msg = "Error while removing the Virtual Firealarm device : " + deviceId.getId();
+            String msg = "Error while removing the Connected Cup device : " + deviceId.getId();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -150,7 +150,7 @@ public class ConnectedCupManager implements DeviceManager {
         boolean isEnrolled = false;
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Checking the enrollment of Virtual Firealarm device : " + deviceId.getId());
+                log.debug("Checking the enrollment of Connected Cup device : " + deviceId.getId());
             }
             IotDevice iotDevice =
                     iotDeviceManagementDAOFactory.getIotDeviceDAO().getIotDevice(
@@ -159,7 +159,7 @@ public class ConnectedCupManager implements DeviceManager {
                 isEnrolled = true;
             }
         } catch (IotDeviceManagementDAOException e) {
-            String msg = "Error while checking the enrollment status of Virtual Firealarm device : " +
+            String msg = "Error while checking the enrollment status of Connected Cup device : " +
                          deviceId.getId();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
@@ -183,13 +183,13 @@ public class ConnectedCupManager implements DeviceManager {
         Device device;
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Getting the details of Virtual Firealarm device : " + deviceId.getId());
+                log.debug("Getting the details of Connected Cup device : " + deviceId.getId());
             }
             IotDevice iotDevice = iotDeviceManagementDAOFactory.getIotDeviceDAO().
                     getIotDevice(deviceId.getId());
             device = IotDeviceManagementUtil.convertToDevice(iotDevice);
         } catch (IotDeviceManagementDAOException e) {
-            String msg = "Error while fetching the Virtual Firealarm device : " + deviceId.getId();
+            String msg = "Error while fetching the Connected Cup device : " + deviceId.getId();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -234,7 +234,7 @@ public class ConnectedCupManager implements DeviceManager {
         try {
             if (log.isDebugEnabled()) {
                 log.debug(
-                        "updating the details of Virtual Firealarm device : " + deviceIdentifier);
+                        "updating the details of Connected Cup device : " + deviceIdentifier);
             }
             ConnectedCupDAO.beginTransaction();
             status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
@@ -248,7 +248,7 @@ public class ConnectedCupManager implements DeviceManager {
                 log.warn(msg, iotDAOEx);
             }
             String msg =
-                    "Error while updating the Virtual Firealarm device : " + deviceIdentifier;
+                    "Error while updating the Connected Cup device : " + deviceIdentifier;
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -260,7 +260,7 @@ public class ConnectedCupManager implements DeviceManager {
         List<Device> devices = null;
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Fetching the details of all Virtual Firealarm devices");
+                log.debug("Fetching the details of all Connected Cup devices");
             }
             List<IotDevice> iotDevices =
                     iotDeviceManagementDAOFactory.getIotDeviceDAO().getAllIotDevices();
@@ -271,7 +271,7 @@ public class ConnectedCupManager implements DeviceManager {
                 }
             }
         } catch (IotDeviceManagementDAOException e) {
-            String msg = "Error while fetching all Virtual Firealarm devices.";
+            String msg = "Error while fetching all Connected Cup devices.";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
