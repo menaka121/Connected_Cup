@@ -9,6 +9,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.connectedcup.controller.service.impl.dto.DeviceJSON;
 import org.wso2.carbon.device.mgt.connectedcup.controller.service.impl.transport.ConnectedCupMQTTConnector;
+import org.wso2.carbon.device.mgt.connectedcup.controller.service.impl.util.ConnectedCupServiceUtils;
 import org.wso2.carbon.device.mgt.connectedcup.plugin.constants.ConnectedCupConstants;
 import org.wso2.carbon.device.mgt.iot.DeviceValidator;
 import org.wso2.carbon.device.mgt.iot.exception.DeviceControllerException;
@@ -173,11 +174,11 @@ public class ConnectedCupControllerService {
             response.setStatus(Response.Status.CONFLICT.getStatusCode());
             return;
         }
-        SensorDataManager.getInstance().setSensorRecord(deviceId, VirtualFireAlarmConstants.SENSOR_TEMP,
+        SensorDataManager.getInstance().setSensorRecord(deviceId, ConnectedCupConstants.SENSOR_TEMPERATURE,
                                                         String.valueOf(temperature),
                                                         Calendar.getInstance().getTimeInMillis());
 
-        if (!VirtualFireAlarmServiceUtils.publishToDAS(dataMsg.owner, dataMsg.deviceId, dataMsg.value)) {
+        if (!ConnectedCupServiceUtils.publishToDAS(dataMsg.owner, dataMsg.deviceId, dataMsg.value)) {
             response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
 
@@ -213,7 +214,7 @@ public class ConnectedCupControllerService {
                                                         String.valueOf(temperature),
                                                         Calendar.getInstance().getTimeInMillis());
 
-        if (!VirtualFireAlarmServiceUtils.publishToDAS(dataMsg.owner, dataMsg.deviceId, dataMsg.value)) {
+        if (!ConnectedCupServiceUtils.publishToDAS(dataMsg.owner, dataMsg.deviceId, dataMsg.value)) {
             response.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
 

@@ -30,6 +30,13 @@ import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.TenantConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
+import org.wso2.carbon.device.mgt.connectedcup.plugin.impl.dao.ConnectedCupDAO;
+import org.wso2.carbon.device.mgt.iot.util.iotdevice.dao.IotDeviceManagementDAOException;
+import org.wso2.carbon.device.mgt.iot.util.iotdevice.dao.IotDeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.iot.util.iotdevice.dto.IotDevice;
+import org.wso2.carbon.device.mgt.iot.util.iotdevice.util.IotDeviceManagementUtil;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,6 +47,7 @@ public class ConnectedCupManager implements DeviceManager {
 
     private static final Log log = LogFactory.getLog(ConnectedCupManager.class);
 
+    private static final IotDeviceManagementDAOFactory iotDeviceManagementDAOFactory = new ConnectedCupDAO();
 
     @Override
     public FeatureManager getFeatureManager() {
@@ -61,25 +69,101 @@ public class ConnectedCupManager implements DeviceManager {
 
     @Override
     public boolean enrollDevice(Device device) throws DeviceManagementException {
-        boolean status = false;
+        boolean status;
+        IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Enrolling a new Virtual Firealarm device : " + device.getDeviceIdentifier());
+            }
+            ConnectedCupDAO.beginTransaction();
+            status = iotDeviceManagementDAOFactory.getIotDeviceDAO().addIotDevice(
+                    iotDevice);
+            ConnectedCupDAO.commitTransaction();
+        } catch (IotDeviceManagementDAOException e) {
+            try {
+                ConnectedCupDAO.rollbackTransaction();
+            } catch (IotDeviceManagementDAOException iotDAOEx) {
+                String msg = "Error occurred while roll back the device enrol transaction :" + device.toString();
+                log.warn(msg, iotDAOEx);
+            }
+            String msg = "Error while enrolling the Virtual Firealarm device : " + device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return status;
     }
 
     @Override
     public boolean modifyEnrollment(Device device) throws DeviceManagementException {
-        boolean status = false;
+        boolean status;
+        IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Modifying the Virtual Firealarm device enrollment data");
+            }
+            ConnectedCupDAO.beginTransaction();
+            status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
+                    .updateIotDevice(iotDevice);
+            ConnectedCupDAO.commitTransaction();
+        } catch (IotDeviceManagementDAOException e) {
+            try {
+                ConnectedCupDAO.rollbackTransaction();
+            } catch (IotDeviceManagementDAOException iotDAOEx) {
+                String msg = "Error occurred while roll back the update device transaction :" + device.toString();
+                log.warn(msg, iotDAOEx);
+            }
+            String msg = "Error while updating the enrollment of the Virtual Firealarm device : " +
+                         device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return status;
     }
 
     @Override
     public boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
-        boolean status = false;
+        boolean status;
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Dis-enrolling Virtual Firealarm device : " + deviceId);
+            }
+            ConnectedCupDAO.beginTransaction();
+            status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
+                    .deleteIotDevice(deviceId.getId());
+            ConnectedCupDAO.commitTransaction();
+        } catch (IotDeviceManagementDAOException e) {
+            try {
+                ConnectedCupDAO.rollbackTransaction();
+            } catch (IotDeviceManagementDAOException iotDAOEx) {
+                String msg = "Error occurred while roll back the device dis enrol transaction :" + deviceId.toString();
+                log.warn(msg, iotDAOEx);
+            }
+            String msg = "Error while removing the Virtual Firealarm device : " + deviceId.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return status;
     }
 
     @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         boolean isEnrolled = false;
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Checking the enrollment of Virtual Firealarm device : " + deviceId.getId());
+            }
+            IotDevice iotDevice =
+                    iotDeviceManagementDAOFactory.getIotDeviceDAO().getIotDevice(
+                            deviceId.getId());
+            if (iotDevice != null) {
+                isEnrolled = true;
+            }
+        } catch (IotDeviceManagementDAOException e) {
+            String msg = "Error while checking the enrollment status of Virtual Firealarm device : " +
+                         deviceId.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return isEnrolled;
     }
 
@@ -96,7 +180,19 @@ public class ConnectedCupManager implements DeviceManager {
 
     @Override
     public Device getDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
-        Device device = null;
+        Device device;
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Getting the details of Virtual Firealarm device : " + deviceId.getId());
+            }
+            IotDevice iotDevice = iotDeviceManagementDAOFactory.getIotDeviceDAO().
+                    getIotDevice(deviceId.getId());
+            device = IotDeviceManagementUtil.convertToDevice(iotDevice);
+        } catch (IotDeviceManagementDAOException e) {
+            String msg = "Error while fetching the Virtual Firealarm device : " + deviceId.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return device;
     }
 
@@ -133,13 +229,52 @@ public class ConnectedCupManager implements DeviceManager {
 
     @Override
     public boolean updateDeviceInfo(DeviceIdentifier deviceIdentifier, Device device) throws DeviceManagementException {
-        boolean status = false;
+        boolean status;
+        IotDevice iotDevice = IotDeviceManagementUtil.convertToIotDevice(device);
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "updating the details of Virtual Firealarm device : " + deviceIdentifier);
+            }
+            ConnectedCupDAO.beginTransaction();
+            status = iotDeviceManagementDAOFactory.getIotDeviceDAO()
+                    .updateIotDevice(iotDevice);
+            ConnectedCupDAO.commitTransaction();
+        } catch (IotDeviceManagementDAOException e) {
+            try {
+                ConnectedCupDAO.rollbackTransaction();
+            } catch (IotDeviceManagementDAOException iotDAOEx) {
+                String msg = "Error occurred while roll back the update device info transaction :" + device.toString();
+                log.warn(msg, iotDAOEx);
+            }
+            String msg =
+                    "Error while updating the Virtual Firealarm device : " + deviceIdentifier;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return status;
     }
 
     @Override
     public List<Device> getAllDevices() throws DeviceManagementException {
         List<Device> devices = null;
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Fetching the details of all Virtual Firealarm devices");
+            }
+            List<IotDevice> iotDevices =
+                    iotDeviceManagementDAOFactory.getIotDeviceDAO().getAllIotDevices();
+            if (iotDevices != null) {
+                devices = new ArrayList<Device>();
+                for (IotDevice iotDevice : iotDevices) {
+                    devices.add(IotDeviceManagementUtil.convertToDevice(iotDevice));
+                }
+            }
+        } catch (IotDeviceManagementDAOException e) {
+            String msg = "Error while fetching all Virtual Firealarm devices.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         return devices;
     }
 
